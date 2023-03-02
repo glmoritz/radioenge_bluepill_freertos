@@ -48,6 +48,8 @@ typedef StaticEventGroup_t osStaticEventGroupDef_t;
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
 
+TIM_HandleTypeDef htim2;
+
 UART_HandleTypeDef huart1;
 DMA_HandleTypeDef hdma_usart1_rx;
 DMA_HandleTypeDef hdma_usart1_tx;
@@ -157,14 +159,6 @@ const osMessageQueueAttr_t ModemSendQueue_attributes = {
   .mq_mem = &ModemSendQueueBuffer,
   .mq_size = sizeof(ModemSendQueueBuffer)
 };
-/* Definitions for PeriodicSendTimer */
-osTimerId_t PeriodicSendTimerHandle;
-osStaticTimerDef_t PeriodicSendTimerControlBlock;
-const osTimerAttr_t PeriodicSendTimer_attributes = {
-  .name = "PeriodicSendTimer",
-  .cb_mem = &PeriodicSendTimerControlBlock,
-  .cb_size = sizeof(PeriodicSendTimerControlBlock),
-};
 /* Definitions for ModemLedTimer */
 osTimerId_t ModemLedTimerHandle;
 osStaticTimerDef_t ModemLedTimerControlBlock;
@@ -180,6 +174,14 @@ const osTimerAttr_t DutyCycleTimer_attributes = {
   .name = "DutyCycleTimer",
   .cb_mem = &DutyCycleTimerControlBlock,
   .cb_size = sizeof(DutyCycleTimerControlBlock),
+};
+/* Definitions for PeriodicSendTimer */
+osTimerId_t PeriodicSendTimerHandle;
+osStaticTimerDef_t PeriodicSendTimerControlBlock;
+const osTimerAttr_t PeriodicSendTimer_attributes = {
+  .name = "PeriodicSendTimer",
+  .cb_mem = &PeriodicSendTimerControlBlock,
+  .cb_size = sizeof(PeriodicSendTimerControlBlock),
 };
 /* Definitions for ATCommandSemaphore */
 osSemaphoreId_t ATCommandSemaphoreHandle;
@@ -242,15 +244,16 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_ADC1_Init(void);
+static void MX_TIM2_Init(void);
 void StartDefaultTask(void *argument);
 extern void ATParsingTaskCode(void *argument);
 extern void ATHandlingTaskCode(void *argument);
 extern void UARTProcTaskCode(void *argument);
 extern void ModemManagerTaskCode(void *argument);
 extern void AppSendTaskCode(void *argument);
-extern void PeriodicSendTimerCallback(void *argument);
 extern void ModemLedCallback(void *argument);
 extern void DutyCycleTimerCallback(void *argument);
+extern void PeriodicSendTimerCallback(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -292,6 +295,7 @@ int main(void)
   MX_DMA_Init();
   MX_USART1_UART_Init();
   MX_ADC1_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   for(i=0;i<255;i++)
   {
@@ -327,14 +331,14 @@ int main(void)
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* Create the timer(s) */
-  /* creation of PeriodicSendTimer */
-  PeriodicSendTimerHandle = osTimerNew(PeriodicSendTimerCallback, osTimerPeriodic, NULL, &PeriodicSendTimer_attributes);
-
   /* creation of ModemLedTimer */
   ModemLedTimerHandle = osTimerNew(ModemLedCallback, osTimerPeriodic, NULL, &ModemLedTimer_attributes);
 
   /* creation of DutyCycleTimer */
   DutyCycleTimerHandle = osTimerNew(DutyCycleTimerCallback, osTimerOnce, NULL, &DutyCycleTimer_attributes);
+
+  /* creation of PeriodicSendTimer */
+  PeriodicSendTimerHandle = osTimerNew(PeriodicSendTimerCallback, osTimerPeriodic, NULL, &PeriodicSendTimer_attributes);
 
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
@@ -503,6 +507,51 @@ static void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 2 */
 
   /* USER CODE END ADC1_Init 2 */
+
+}
+
+/**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 9600-1;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 4294967295;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
 
 }
 
