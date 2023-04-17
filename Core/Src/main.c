@@ -63,7 +63,7 @@ const osThreadAttr_t defaultTask_attributes = {
 };
 /* Definitions for ATParsingTask */
 osThreadId_t ATParsingTaskHandle;
-uint32_t ATParsingTaskBuffer[ 128 ];
+uint32_t ATParsingTaskBuffer[ 256 ];
 osStaticThreadDef_t ATParsingTaskControlBlock;
 const osThreadAttr_t ATParsingTask_attributes = {
   .name = "ATParsingTask",
@@ -75,7 +75,7 @@ const osThreadAttr_t ATParsingTask_attributes = {
 };
 /* Definitions for ATHandlingTask */
 osThreadId_t ATHandlingTaskHandle;
-uint32_t ATHandlingTaskBuffer[ 128 ];
+uint32_t ATHandlingTaskBuffer[ 256 ];
 osStaticThreadDef_t ATHandlingTaskControlBlock;
 const osThreadAttr_t ATHandlingTask_attributes = {
   .name = "ATHandlingTask",
@@ -87,7 +87,7 @@ const osThreadAttr_t ATHandlingTask_attributes = {
 };
 /* Definitions for UARTProcTask */
 osThreadId_t UARTProcTaskHandle;
-uint32_t UARTProcTaskBuffer[ 128 ];
+uint32_t UARTProcTaskBuffer[ 256 ];
 osStaticThreadDef_t UARTProcTaskControlBlock;
 const osThreadAttr_t UARTProcTask_attributes = {
   .name = "UARTProcTask",
@@ -99,7 +99,7 @@ const osThreadAttr_t UARTProcTask_attributes = {
 };
 /* Definitions for ModemMngrTask */
 osThreadId_t ModemMngrTaskHandle;
-uint32_t ModemMngrTaskBuffer[ 128 ];
+uint32_t ModemMngrTaskBuffer[ 256 ];
 osStaticThreadDef_t ModemMngrTaskControlBlock;
 const osThreadAttr_t ModemMngrTask_attributes = {
   .name = "ModemMngrTask",
@@ -111,14 +111,14 @@ const osThreadAttr_t ModemMngrTask_attributes = {
 };
 /* Definitions for AppSendTask */
 osThreadId_t AppSendTaskHandle;
-uint32_t AppSendTaskBuffer[ 128 ];
-osStaticThreadDef_t AppSendTaskControlBlock;
+uint32_t SendTemperatureBuffer[ 256 ];
+osStaticThreadDef_t SendTemperatureControlBlock;
 const osThreadAttr_t AppSendTask_attributes = {
   .name = "AppSendTask",
-  .cb_mem = &AppSendTaskControlBlock,
-  .cb_size = sizeof(AppSendTaskControlBlock),
-  .stack_mem = &AppSendTaskBuffer[0],
-  .stack_size = sizeof(AppSendTaskBuffer),
+  .cb_mem = &SendTemperatureControlBlock,
+  .cb_size = sizeof(SendTemperatureControlBlock),
+  .stack_mem = &SendTemperatureBuffer[0],
+  .stack_size = sizeof(SendTemperatureBuffer),
   .priority = (osPriority_t) osPriorityLow7,
 };
 /* Definitions for uartQueue */
